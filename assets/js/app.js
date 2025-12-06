@@ -144,10 +144,40 @@ const recetasDulces = [
       "https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRkYdyocmMb3Dv2k7Anasb_rfCjOVrL-gC2UjYTz6-OX815lQMB6XkxKtjql2bX",
   },
 ];
-function showProducts(productsArray, elementHTML, callback) {
+
+function showRecipes(productsArray, elementHTML) {
   elementHTML.innerHTML = "";
   productsArray.forEach((product) => {
-    elementHTML.innerHTML += callback(product);
+    elementHTML.innerHTML += `<article class="col">
+      <div class="card h-100">
+        <img
+          src="${product.imagen}"
+          class="card-img-top img-fit"
+          alt="${product.nombre}"
+          loading="lazy"
+        />
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">${product.nombre}</h5>
+          <p class="card-text">${product.descripcion}</p>
+          <button class="btn btn-primary mt-auto">
+            Ver receta
+          </button>
+        </div>
+      </div>
+    </article>`;
+  });
+}
+
+function showTabs(categoriesArray, navBar) {
+  categoriesArray.forEach((category) => {
+    navBar.innerHTML += `
+    <li class="nav-item"
+      role="presentation">
+      <a class="nav-link" 
+      href="#" 
+      data-target="${category}">
+      ${category} min.</a>
+    </li>`;
   });
 }
 
@@ -161,57 +191,101 @@ function timeCategorizer(productsArray) {
   return categorias.sort((a, b) => a - b);
 }
 
-const recipeContainer = document.getElementById("recipe-container");
-showProducts(recetasDulces, recipeContainer, (el) => {
-  return ` <article class="col">
-      <div class="card h-100">
-        <img
-          src="${el.imagen}"
-          class="card-img-top img-fit"
-          alt="${el.nombre}"
-          loading="lazy"
-        />
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${el.nombre}</h5>
-          <p class="card-text">${el.descripcion}</p>
-          <button class="btn btn-primary mt-auto">
-            Ver receta
-          </button>
-        </div>
-      </div>
-    </article>`;
-});
+function removeAccents(str) {
+  const accents = {
+    á: "a",
+    é: "e",
+    í: "i",
+    ó: "o",
+    ú: "u",
+    Á: "A",
+    É: "E",
+    Í: "I",
+    Ó: "O",
+    Ú: "U",
+    ñ: "n",
+    Ñ: "N",
+    ö: "o",
+    Ö: "Ö",
+    ü: "u",
+    Ü: "U",
+  };
+  return str
+    .split("")
+    .map((char) => accents[char] || char)
+    .join("");
+}
+
+const recipeContainer = document.querySelector("#recipe-container");
+showRecipes(recetasDulces, recipeContainer);
 
 const navTabs = document.querySelector(".nav-tabs");
+const allRecipes = document.querySelector("#allRecipes");
 const categorias = timeCategorizer(recetasDulces);
-showProducts(categorias, navTabs, (el) => {
-  return `<li class="nav-item" role="presentation">
-    <a class="nav-link" href="#" data-target="${el}">${el}</a>
-  </li>`;
-});
+showTabs(categorias, navTabs);
 
 navTabs.addEventListener("click", (e) => {
   e.preventDefault();
-  showProducts(recetasDulces, recipeContainer, (el) => {
-    if (e.target.dataset.target == el.tiempo) {
-      return ` <article class="col">
+  document
+    .querySelectorAll(".nav-link")
+    .forEach((link) => link.classList.remove("active"));
+  e.target.classList.add("active");
+  if (e.target.id === "allRecipes") {
+    showRecipes(recetasDulces, recipeContainer);
+  } else {
+    const timeTab = parseInt(e.target.dataset.target);
+    const filtredRecipes = recetasDulces.filter(
+      (receta) => receta.tiempo === timeTab
+    );
+    showRecipes(filtredRecipes, recipeContainer);
+  }
+});
+
+const searchForm = document.querySelector('form[role="search"]');
+const searchInput = document.getElementById("searchInput");
+
+searchForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const searchTerm = removeAccents(searchInput.value.trim()).toLowerCase();
+  if (searchTerm === "") {
+    showRecipes(recetasDulces, recipeContainer);
+    return;
+  }
+  const filteredRecipes = recetasDulces.filter((receta) => {
+    const matchNombre = removeAccents(receta.nombre)
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchDescripcion = removeAccents(receta.descripcion)
+      .toLowerCase()
+      .includes(searchTerm);
+    const matchIngredientes = receta.ingredientes.some((ingrediente) =>
+      removeAccents(ingrediente).toLowerCase().includes(searchTerm)
+    );
+    const matchTiempo = receta.tiempo.toString().includes(searchTerm);
+    return matchNombre || matchDescripcion || matchIngredientes || matchTiempo;
+  });
+
+  if (filteredRecipes.length > 0) {
+    showRecipes(filteredRecipes, recipeContainer);
+    document
+      .querySelectorAll(".nav-link")
+      .forEach((link) => link.classList.remove("active"));
+  } else {
+    recipeContainer.innerHTML = `<article class="col">
       <div class="card h-100">
-        <img
-          src="${el.imagen}"
-          class="card-img-top img-fit"
-          alt="${el.nombre}"
-          loading="lazy"
-        />
         <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${el.nombre}</h5>
-          <p class="card-text">${el.descripcion}</p>
-          <button class="btn btn-primary mt-auto">
-            Ver receta
+          <h5 class="card-title">No se encontraron recetas</h5>
+          <p class="card-text">que coincidan con: <b>${searchTerm}</b></p>
+          <button id="resetSearch" class="btn btn-primary mt-auto">
+            Ver todas las recetas
           </button>
         </div>
       </div>
     </article>`;
-    }
-    return "";
+  }
+  document.querySelector("#resetSearch").addEventListener("click", () => {
+    searchInput.value = "";
+    showRecipes(recetasDulces, recipeContainer);
+    document.getElementById("allRecipes").classList.add("active");
   });
 });

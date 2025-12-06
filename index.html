@@ -22,12 +22,15 @@
           <div class="col">
             <form class="d-flex" role="search">
               <input
-                class="form-control py-4 m-2"
+                id="searchInput"
+                class="form-control py-2 m-2"
                 type="search"
                 placeholder="Busca por receta, platillo o ingrediente..."
                 aria-label="Search"
               />
-              <button class="btn btn-secondary" type="submit">Buscar</button>
+              <button id="searchButton" class="btn btn-secondary" type="submit">
+                Buscar
+              </button>
             </form>
           </div>
         </div>
@@ -53,6 +56,11 @@
           Gourmet Go
         </a>
         <ul class="nav nav-tabs">
+          <li class="nav-item">
+            <a class="nav-link" href="#" role="presentation" id="allRecipes"
+              >Todas las recetas</a
+            >
+          </li>
           <!-- Tabs will be dynamically inserted here -->
         </ul>
       </div>
