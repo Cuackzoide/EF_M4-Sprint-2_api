@@ -1,84 +1,84 @@
-# 📥EF-M3 Proyecto Integrador Sprint 1
+# 📥 EF- M4 Proyecto Integrador Sprint 2
 
-## Maquetación y Prototipo Visual del "Buscador de Recetas"
+## Sprint 2: Desarrollo de Funcionalidad y Conexión a API
+
+### Briefing del Cliente: "Gourmet Go" - Fase 2
+
+¡El equipo está muy satisfecho con el prototipo visual del Sprint 1! El diseño ha sido aprobado y ahora es el momento de darle vida a la aplicación.
+
+Para este segundo y último sprint, el objetivo es transformar la maqueta estática en una aplicación web completamente funcional. Esto implica conectar la interfaz con una API de recetas real, gestionar las búsquedas del usuario de forma asíncrona y mostrar los resultados dinámicamente en la página.
+
+**Información Clave sobre la API de TheMealDB:**
+Antes de comenzar, es fundamental entender cómo obtendremos los datos. Para saber qué ingredientes se pueden buscar, la API nos proporciona un endpoint que lista todas las opciones disponibles:
+
+**Endpoint para listar todos los ingredientes:**
+https://www.themealdb.com/api/json/v1/1/list.php?i=list
+
+Al consultar esta dirección, obtendrán un objeto JSON que contiene un array. Cada elemento de ese array es un objeto que representa un ingrediente. La propiedad clave que nos interesa de cada objeto es `strIngredient`. Este es el dato que luego utilizaremos en el endpoint de filtrado para buscar las recetas.
+
+Por ejemplo, un segmento del JSON que devuelve la API se ve así:
+
+```js
+{
+"idIngredient": "47",
+"strIngredient": "Cardamom",
+"strDescription": null,
+"strType": null
+}
+```
+
+Conocer este listado les permitirá entender qué datos son válidos para las búsquedas que implementarán a continuación. Al finalizar este sprint, tendremos un producto mínimo viable (MVP) listo para ser presentado.
 
 ### Historias de Usuario a Implementar
 
-#### HU-01: Interfaz Principal de Búsqueda
+#### HU-04: Búsqueda Funcional de Recetas
 
-**Como usuario que visita el sitio:**
-
-- Quiero ver un encabezado claro y un campo de búsqueda prominente,
-
-- Para entender inmediatamente el propósito de la aplicación y cómo empezar a usarla.
+- Como usuario, quiero poder escribir un ingrediente en la barra de búsqueda y presionar "Buscar", para obtener una lista de recetas que contengan ese ingrediente.
 
 **Criterios de Aceptación:**
 
-[x] La página debe tener un título principal, como "Buscador de Recetas".
+✅ Al enviar el formulario de búsqueda (haciendo clic en el botón o presionando Enter), se debe prevenir el comportamiento por defecto de recarga de la página.
 
-[x] Debe existir un formulario que contenga un campo de texto `<input>` con un placeholder descriptivo (ej: "Busca por ingrediente...").
+✅ Se debe capturar el texto ingresado por el usuario en el campo de búsqueda.
 
-[x] El formulario debe incluir un botón `<button>` con un texto claro (ej: "Buscar").
+✅ Se debe realizar una llamada asíncrona a la API de TheMealDB usando el ingrediente capturado. El endpoint a utilizar es: https://www.themealdb.com/api/json/v1/1/filter.php?i=[ingrediente_del_usuario].
 
-[x] Los elementos deben estar estilizados usando clases de Bootstrap para form y button.
+✅ La llamada a la API debe realizarse utilizando la sintaxis moderna `fetch` con `async/await`.
 
-#### HU-02: Visualización de Recetas de Ejemplo
+#### HU-05: Renderizado Dinámico de Resultados
 
-**Como usuario nuevo:**
-
-- Quiero ver una galería con ejemplos de recetas al cargar la página,
-
-- Para tener una idea de cómo se presentarán los resultados y qué tipo de contenido esperar.
+- Como usuario, quiero que los resultados de mi búsqueda aparezcan en la galería sin que la página se recargue, para tener una experiencia de usuario fluida y rápida.
 
 **Criterios de Aceptación:**
 
-[x] Se debe mostrar una sección de resultados debajo del buscador.
+✅ Las tarjetas de recetas "hard-codeadas" del `index.html` deben ser eliminadas. El contenedor de resultados debe estar vacío por defecto.
 
-[x] Esta sección debe contener entre 3 y 6 tarjetas de recetas escritas directamente en el archivo index.html (hard-codeadas).
+✅ Por cada receta devuelta por la API, se debe generar dinámicamente una tarjeta HTML y añadirla al DOM.
 
-[x] Cada tarjeta debe utilizar el componente card de Bootstrap.
+✅ La estructura HTML de cada tarjeta debe ser generada utilizando _template literals_ de ES6+ y debe replicar exactamente el diseño de las tarjetas del Sprint 1 (usando las mismas clases de Bootstrap).
 
-[x] Cada tarjeta debe incluir obligatoriamente:
+✅ Los datos de la receta (nombre, imagen) deben ser extraídos del objeto de respuesta de la API, preferiblemente usando _desestructuración_.
 
-- Una imagen `<img class="card-img-top">`.
+✅ Al realizar una nueva búsqueda, los resultados anteriores deben ser eliminados del contenedor antes de mostrar los nuevos.
 
-- Un título `<h5 class="card-title">`.
+#### HU-06: Manejo de Búsquedas sin Resultados
 
-- Un botón o enlace `<a href="#" class="btn btn-primary">`.
-
-#### HU-03: Experiencia en Dispositivos Móviles
-
-**Como usuario de smartphone:**
-
-- Quiero que la aplicación se adapte fluidamente a mi pantalla,
-
-- Para poder buscar recetas cómodamente desde cualquier lugar.
+- Como usuario, quiero recibir un mensaje claro si mi búsqueda no encuentra ninguna receta, para saber que la búsqueda se completó y que debo intentar con otro ingrediente.
 
 **Criterios de Aceptación:**
 
-[x] El diseño debe ser completamente responsivo.
-
-[x] En pantallas grandes (desktop), las tarjetas de recetas deben mostrarse en una grilla (ej: 3 columnas).
-
-[x] En pantallas pequeñas (móviles), las tarjetas deben apilarse verticalmente (1 columna).
-
-[x] El sistema de grillas de Bootstrap `row, col-lg-4, col-md-6` debe ser utilizado para lograr la responsividad.
+✅ Si la respuesta de la API indica que no se encontraron recetas para un ingrediente (`meals` es `null`), el contenedor de resultados debe mostrar un único mensaje informativo, como por ejemplo: "Lo sentimos, no se encontraron recetas. Intenta con otro ingrediente."
 
 ### Requisitos Técnicos y Entregables
 
-**Estructura del Proyecto:**
+- **Código Fuente:** Todo el código JavaScript debe ser escrito en el archivo `app.js.`
 
-- El código debe estar organizado en tres archivos base:
+- **Sintaxis Moderna (ES6+):** Es mandatorio el uso de `let` y `const` para la declaración de variables, `arrow functions`, `template literals` y `destructuring`.
 
-1.  index.html para la estructura
-2.  style.css para estilos personalizados
-3.  app.js (que permanecerá vacío, preparando el Sprint 2).
+- **Asincronía:** La gestión de las llamadas a la API debe realizarse con `fetch` y la sintaxis `async/await` para un manejo de código limpio y legible.
 
-- Frameworks y Librerías:
+- **Manipulación del DOM:** Toda la interacción con el HTML (lectura de inputs, limpieza y renderizado de resultados) debe hacerse a través de los métodos del DOM.
 
-1. Se debe utilizar Bootstrap 5 como framework principal de CSS.
-2. Se permite el uso de un style.css adicional para personalizar detalles finos (colores, fuentes, sombras, etc.).
+- **Buenas Prácticas:** (Opcional pero recomendado) Considerar el uso de Programación Orientada a Objetos (POO) creando una clase `Receta` para modelar y estandarizar los datos recibidos de la API antes de renderizarlos.
 
-### Entregable:
-
-Un [repositorio público de GitHub](https://github.com/cuackzoide/EF-M3-SPRINT-1-FRONT-END) que contenga la carpeta del proyecto con los tres archivos.
+- **Entregable:** Un [repositorio público]() de GitHub con el proyecto finalizado y completamente funcional.
