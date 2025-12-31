@@ -81,4 +81,4 @@ Conocer este listado les permitirá entender qué datos son válidos para las b�
 
 - **Buenas Prácticas:** (Opcional pero recomendado) Considerar el uso de Programación Orientada a Objetos (POO) creando una clase `Receta` para modelar y estandarizar los datos recibidos de la API antes de renderizarlos.
 
-- **Entregable:** Un [repositorio público]() de GitHub con el proyecto finalizado y completamente funcional.
+- **Entregable:** Un [repositorio público](https://github.com/Cuackzoide/EF_M4-Sprint-2_api) de GitHub con el proyecto finalizado y completamente funcional.

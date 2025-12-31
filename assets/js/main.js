@@ -1,3 +1,4 @@
+// Función para remover acentos (más util en español)
 function removeAccents(str) {
   const accents = {
     á: "a",
@@ -22,12 +23,12 @@ function removeAccents(str) {
     .map((char) => accents[char] || char)
     .join("");
 }
-
+// Funcion reutilizable para formatear strings
 function formatter(string) {
   const strValue = string.toLowerCase().trim();
   return removeAccents(strValue);
 }
-
+// Array de ingredientes buscados, con valores por defecto para inicio rapido
 let searchHistory = [
   "onion",
   "chicken",
@@ -36,7 +37,7 @@ let searchHistory = [
   "tomato",
   "potatoes",
 ];
-
+// Función para actualizar el historial con nuevas busquedas
 function updateHistory(string) {
   if (searchHistory.includes(string)) {
     let position = searchHistory.indexOf(string);
@@ -47,7 +48,7 @@ function updateHistory(string) {
     searchHistory.pop();
   }
 }
-
+// Funcion para renderizar las recetas
 function showRecipes(recipesArray, elementHTML) {
   elementHTML.innerHTML = "";
   if (!recipesArray || recipesArray.length === 0) {
@@ -74,7 +75,7 @@ function showRecipes(recipesArray, elementHTML) {
           </article>`;
   });
 }
-
+// Funcion para renderizar las pestañas de categorías
 function showTabs(categoriesArray, TabsBar) {
   TabsBar.innerHTML = "";
   categoriesArray.forEach((category) => {
@@ -88,7 +89,7 @@ function showTabs(categoriesArray, TabsBar) {
     </li>`;
   });
 }
-
+// Función para buscar ingredientes válidos desde la API
 async function searchIngredient() {
   const url = "https://www.themealdb.com/api/json/v1/1/list.php?i=list";
   try {
@@ -100,7 +101,7 @@ async function searchIngredient() {
     return [];
   }
 }
-
+// Función para buscar recetas por ingrediente desde la API
 async function searchMeals(ingredient) {
   const url = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${ingredient}`;
   try {
@@ -112,13 +113,14 @@ async function searchMeals(ingredient) {
     return [];
   }
 }
-
+// Selección de elementos del DOM
 const searchForm = document.querySelector('form[role="search"]');
 const searchInput = document.getElementById("searchInput");
 const recipeContainer = document.querySelector("#recipe-container");
 const navTabs = document.querySelector(".nav-tabs");
 const navBrand = document.querySelector(".navbar-brand");
 
+// Carga inicial de la página
 document.addEventListener("DOMContentLoaded", async (e) => {
   showTabs(searchHistory, navTabs);
   showRecipes(await searchMeals(searchHistory[0]), recipeContainer);
@@ -127,12 +129,13 @@ document.addEventListener("DOMContentLoaded", async (e) => {
   if (links[0]) links[0].classList.add("active");
 });
 
+// Manejo del envío de la busqueda
 searchForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const searchTerm = formatter(searchInput.value);
   const ingredientList = await searchIngredient();
   const match = ingredientList.some(
-    (ingredient) => ingredient.toLowerCase() === searchTerm
+    (ingredient) => formatter(ingredient) === searchTerm
   );
   if (match) {
     const recipes = await searchMeals(searchTerm);
@@ -141,7 +144,7 @@ searchForm.addEventListener("submit", async (e) => {
     showTabs(searchHistory, navTabs);
     const links = document.querySelectorAll(".nav-link");
     links.forEach((el) => el.classList.remove("active"));
-    if (links[0]) links[0].classList.add("active");
+    links[0].classList.add("active"); // siempre queda en primera pestaña
   } else {
     recipeContainer.innerHTML = `<p class="text-center w-100 lead">There are no recipes for "${searchTerm}" or It's not a valid search.</p>`;
     const links = document.querySelectorAll(".nav-link");
@@ -151,9 +154,10 @@ searchForm.addEventListener("submit", async (e) => {
   searchInput.focus();
 });
 
+// Manejo del clic en las pestañas de navegación
 navTabs.addEventListener("click", async (e) => {
   e.preventDefault();
-  const link = e.target.closest(".nav-link");
+  const link = e.target.closest(".nav-link"); //evita errores al presionar
   if (!link) return;
   const links = document.querySelectorAll(".nav-link");
   links.forEach((el) => el.classList.remove("active"));
@@ -164,6 +168,7 @@ navTabs.addEventListener("click", async (e) => {
   showRecipes(recipes, recipeContainer);
 });
 
+// Manejo del clic en la "Brand" de la barra de navegación
 navBrand.addEventListener("click", async (e) => {
   e.preventDefault();
   showTabs(searchHistory, navTabs);
